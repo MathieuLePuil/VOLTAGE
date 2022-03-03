@@ -1,43 +1,41 @@
 import discord
-from discord.ext import commands, tasks
-import random
-import datetime
-from discord.ext.commands import has_permissions, MissingPermissions
-import asyncio
+from discord.ext import commands
 import json
-import re
-import string
 from discord_slash import SlashCommand
+
 intents = discord.Intents.default()
 intents.typing = True
 intents.presences = True
 intents.members = True
 intents.reactions = True
 
-#py desktop\Bots_Discord\Voltage\main.py
+
+# py desktop\Bots_Discord\Voltage\main.py
 
 
-async def get_prefix(bot, message):
-
-    with open("prefixes.json", "r") as f:
+async def get_prefix(message):
+    with open("/home/mmi21b12/DISCORD/VOLTAGE/prefixes.json", "r") as f:
         prefixes = json.load(f)
 
     return prefixes[str(message.guild.id)]
 
 
-bot = commands.Bot(command_prefix = get_prefix, intents=intents)
+bot = commands.Bot(command_prefix=get_prefix, intents=intents)
 bot.remove_command("help")
 bot.remove_command("clear")
-slash = SlashCommand(bot, sync_commands = True)
+slash = SlashCommand(bot, sync_commands=True)
 
-extensions = ['clear', 'prefix', 'mute', 'warn', 'ban', 'reset', 'sanction', 'help', 'on_command_error', 'kick', 'latence', 'prison']
+extensions = ['clear', 'prefix', 'mute', 'warn', 'ban', 'reset', 'sanction', 'help', 'on_command_error', 'kick',
+              'latence', 'prison']
+
 
 @bot.event
 async def on_ready():
     print("Le Bot Voltage est PRET!")
 
+
 @slash.slash()
-@commands.has_permissions(ban_members = True)
+@commands.has_permissions(ban_members=True)
 async def load(ctx, extension):
     try:
         bot.load_extension(extension)
@@ -45,14 +43,16 @@ async def load(ctx, extension):
     except Exception as error:
         await ctx.send('**{}** cannot be loaded. [{}]'.format(extension, error))
 
+
 @slash.slash()
-@commands.has_permissions(ban_members = True)
+@commands.has_permissions(ban_members=True)
 async def unload(ctx, extension):
     try:
         bot.unload_extension(extension)
         await ctx.send('Unloaded **{}**'.format(extension))
     except Exception as error:
         await ctx.send('**{}** cannot be unloaded. [{}]'.format(extension, error))
+
 
 if __name__ == '__main__':
     for extension in extensions:
@@ -61,8 +61,9 @@ if __name__ == '__main__':
         except Exception as error:
             print('**{}** cannot be loaded. [{}]'.format(extension, error))
 
+
 @slash.slash()
-@commands.has_permissions(ban_members = True)
+@commands.has_permissions(ban_members=True)
 async def reload(ctx, extension):
     if extension:
         try:
