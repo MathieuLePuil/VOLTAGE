@@ -6,27 +6,66 @@ import asyncio
 from discord_slash import cog_ext
 
 
+def convert(time):
+
+    pos = ["s", "m", "h", "d"]
+
+    time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
+
+    unit = time[-1]
+
+    if unit not in pos:
+        return -1
+
+    try:
+        val = int(time[:-1])
+    except:
+        return -2
+
+    return val * time_dict[unit]
+
+
+async def get_prison_data():
+    with open("/home/mmi21b12/DISCORD/VOLTAGE/prisons.json", "r") as f:
+        users = json.load(f)
+
+    return users
+
+
+async def first_prison(user):
+
+    users = await get_prison_data()
+    name = f"{user.name}#{user.discriminator}"
+
+    if str(user.id) in users:
+        return False
+    else:
+
+        users[str(user.id)] = {}
+        users[str(user.id)]["user_name"] = name
+        users[str(user.id)]["1ere Prison"] = "Aucune"
+        users[str(user.id)]["p-Jour1"] = 0
+        users[str(user.id)]["p-Mois1"] = 0
+        users[str(user.id)]["p-Annee1"] = 0
+        users[str(user.id)]["p-Heure1"] = 0
+        users[str(user.id)]["p-Minute1"] = 0
+        users[str(user.id)]["p-Duree1"] = None
+        users[str(user.id)]["2eme Prison"] = "Aucune"
+        users[str(user.id)]["p-Jour2"] = 0
+        users[str(user.id)]["p-Mois2"] = 0
+        users[str(user.id)]["p-Annee2"] = 0
+        users[str(user.id)]["p-Heure2"] = 0
+        users[str(user.id)]["p-Minute2"] = 0
+        users[str(user.id)]["p-Duree2"] = None
+
+    with open("/home/mmi21b12/DISCORD/VOLTAGE/prisons.json", "w") as f:
+        json.dump(users, f, indent=2)
+    return True
+
+
 class Prison(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    def convert(self, time):
-
-        pos = ["s", "m", "h", "d"]
-
-        time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
-
-        unit = time[-1]
-
-        if unit not in pos:
-            return -1
-
-        try:
-            val = int(time[:-1])
-        except:
-            return -2
-
-        return val * time_dict[unit]
 
     @cog_ext.cog_slash(name="prison", description="Emprisonne un utilisateur.")
     @commands.has_permissions(kick_members=True)
@@ -39,10 +78,10 @@ class Prison(commands.Cog):
         log_channel = self.bot.get_channel(853703546028818443)
         sanc_channel = self.bot.get_channel(752849744367190016)
 
-        await self.first_prison(user)
-        users = await self.get_prison_data()
+        await first_prison(user)
+        users = await get_prison_data()
         date = datetime.datetime.now()
-        time = self.convert(duree)
+        time = convert(duree)
 
         em = discord.Embed(description=f"**{user}** a été emprisonné **{duree}**! \n \n **Raison:** {reason}",
                            color=0xC15200)
@@ -81,8 +120,8 @@ class Prison(commands.Cog):
         except KeyError:
             print("Il y a une erreur!")
 
-        with open("prisons.json", "w") as f:
-            users = json.dump(users, f, indent=2)
+        with open("/home/mmi21b12/DISCORD/VOLTAGE/prisons.json", "w") as f:
+            json.dump(users, f, indent=2)
 
         await user.add_roles(prisonRole)
         await user.remove_roles(acheteurRole)
@@ -111,42 +150,6 @@ class Prison(commands.Cog):
 
         else:
             return
-
-    async def first_prison(self, user):
-
-        users = await self.get_prison_data()
-        name = f"{user.name}#{user.discriminator}"
-
-        if str(user.id) in users:
-            return False
-        else:
-
-            users[str(user.id)] = {}
-            users[str(user.id)]["user_name"] = name
-            users[str(user.id)]["1ere Prison"] = "Aucune"
-            users[str(user.id)]["p-Jour1"] = 0
-            users[str(user.id)]["p-Mois1"] = 0
-            users[str(user.id)]["p-Annee1"] = 0
-            users[str(user.id)]["p-Heure1"] = 0
-            users[str(user.id)]["p-Minute1"] = 0
-            users[str(user.id)]["p-Duree1"] = None
-            users[str(user.id)]["2eme Prison"] = "Aucune"
-            users[str(user.id)]["p-Jour2"] = 0
-            users[str(user.id)]["p-Mois2"] = 0
-            users[str(user.id)]["p-Annee2"] = 0
-            users[str(user.id)]["p-Heure2"] = 0
-            users[str(user.id)]["p-Minute2"] = 0
-            users[str(user.id)]["p-Duree2"] = None
-
-        with open("prisons.json", "w") as f:
-            users = json.dump(users, f, indent=2)
-        return True
-
-    async def get_prison_data(self):
-        with open("prisons.json", "r") as f:
-            users = json.load(f)
-
-        return users
 
 
 def setup(bot):

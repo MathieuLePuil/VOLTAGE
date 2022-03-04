@@ -6,27 +6,73 @@ import asyncio
 from discord_slash import cog_ext
 
 
+def convert(time):
+
+    pos = ["s", "m", "h", "d"]
+
+    time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
+
+    unit = time[-1]
+
+    if unit not in pos:
+        return -1
+
+    try:
+        val = int(time[:-1])
+    except:
+        return -2
+
+    return val * time_dict[unit]
+
+
+def getMuteRole(ctx):
+    roles = ctx.guild.roles
+    for role in roles:
+        if role.name == "Muted":
+            return role
+
+
+async def get_mute_data():
+    with open("/home/mmi21b12/DISCORD/VOLTAGE/mutes.json", "r") as f:
+        users = json.load(f)
+
+    return users
+
+
+async def first_mute(user):
+
+    users = await get_mute_data()
+    name = f"{user.name}#{user.discriminator}"
+
+    if str(user.id) in users:
+        return False
+    else:
+
+        users[str(user.id)] = {}
+        users[str(user.id)]["user_name"] = name
+        users[str(user.id)]["1er Mute"] = "Aucune"
+        users[str(user.id)]["m-Jour1"] = 0
+        users[str(user.id)]["m-Mois1"] = 0
+        users[str(user.id)]["m-Annee1"] = 0
+        users[str(user.id)]["m-Heure1"] = 0
+        users[str(user.id)]["m-Minute1"] = 0
+        users[str(user.id)]["m-Duree1"] = None
+        users[str(user.id)]["2eme Mute"] = "Aucune"
+        users[str(user.id)]["m-Jour2"] = 0
+        users[str(user.id)]["m-Mois2"] = 0
+        users[str(user.id)]["m-Annee2"] = 0
+        users[str(user.id)]["m-Heure2"] = 0
+        users[str(user.id)]["m-Minute2"] = 0
+        users[str(user.id)]["m-Duree2"] = None
+
+    with open("/home/mmi21b12/DISCORD/VOLTAGE/mutes.json", "w") as f:
+        json.dump(users, f, indent=2)
+    return True
+
+
 class Mute(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    def convert(self, time):
-
-        pos = ["s", "m", "h", "d"]
-
-        time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
-
-        unit = time[-1]
-
-        if unit not in pos:
-            return -1
-
-        try:
-            val = int(time[:-1])
-        except:
-            return -2
-
-        return val * time_dict[unit]
 
     async def createMuteRole(self, ctx):
         muteRole = await ctx.guild.create_role(name="Muted",
@@ -35,13 +81,7 @@ class Mute(commands.Cog):
             await channel.set_permissions(muteRole, send_messages=False, speak=True)
             return muteRole
 
-        return await createMuteRole(self, ctx)
-
-    def getMuteRole(self, ctx):
-        roles = ctx.guild.roles
-        for role in roles:
-            if role.name == "Muted":
-                return role
+        return await self.createMuteRole(self)
 
     @cog_ext.cog_slash(name="mute", description="Rend muet un utilisateur.")
     @commands.has_permissions(kick_members=True)
@@ -49,10 +89,10 @@ class Mute(commands.Cog):
 
         log_channel = self.bot.get_channel(853703546028818443)
 
-        await self.first_mute(user)
-        users = await self.get_mute_data()
-        muteRole = self.getMuteRole(ctx)
-        time = self.convert(duree)
+        await first_mute(user)
+        users = await get_mute_data()
+        muteRole = getMuteRole(ctx)
+        time = convert(duree)
         date = datetime.datetime.now()
 
         em = discord.Embed(description=f"**{user}** a été mute **{duree}**! \n \n **Raison:** {reason}", color=0xC15200)
@@ -89,7 +129,7 @@ class Mute(commands.Cog):
             print(f"Il y a une erreur!")
 
         with open("/home/mmi21b12/DISCORD/VOLTAGE/mutes.json", "w") as f:
-            users = json.dump(users, f, indent=2)
+            json.dump(users, f, indent=2)
 
         await user.add_roles(muteRole)
 
@@ -122,47 +162,11 @@ class Mute(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def unmute(self, ctx, user: discord.Member):
 
-        muteRole = self.getMuteRole(ctx)
+        muteRole = getMuteRole(ctx)
         await user.remove_roles(muteRole)
 
         em1 = discord.Embed(description=f"{user} a été unmute!", color=0xC15200)
         await ctx.send(embed=em1)
-
-    async def first_mute(self, user):
-
-        users = await self.get_mute_data()
-        name = f"{user.name}#{user.discriminator}"
-
-        if str(user.id) in users:
-            return False
-        else:
-
-            users[str(user.id)] = {}
-            users[str(user.id)]["user_name"] = name
-            users[str(user.id)]["1er Mute"] = "Aucune"
-            users[str(user.id)]["m-Jour1"] = 0
-            users[str(user.id)]["m-Mois1"] = 0
-            users[str(user.id)]["m-Annee1"] = 0
-            users[str(user.id)]["m-Heure1"] = 0
-            users[str(user.id)]["m-Minute1"] = 0
-            users[str(user.id)]["m-Duree1"] = None
-            users[str(user.id)]["2eme Mute"] = "Aucune"
-            users[str(user.id)]["m-Jour2"] = 0
-            users[str(user.id)]["m-Mois2"] = 0
-            users[str(user.id)]["m-Annee2"] = 0
-            users[str(user.id)]["m-Heure2"] = 0
-            users[str(user.id)]["m-Minute2"] = 0
-            users[str(user.id)]["m-Duree2"] = None
-
-        with open("/home/mmi21b12/DISCORD/VOLTAGE/mutes.json", "w") as f:
-            users = json.dump(users, f, indent=2)
-        return True
-
-    async def get_mute_data(self):
-        with open("/home/mmi21b12/DISCORD/VOLTAGE/mutes.json", "r") as f:
-            users = json.load(f)
-
-        return users
 
 
 def setup(bot):

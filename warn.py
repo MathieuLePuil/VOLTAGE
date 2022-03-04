@@ -6,6 +6,42 @@ from discord.ext import commands
 from discord_slash import cog_ext
 
 
+async def get_warn_data():
+    with open("/home/mmi21b12/DISCORD/VOLTAGE/warns.json", "r") as f:
+        users = json.load(f)
+
+    return users
+
+
+async def first_warn(user):
+
+    users = await get_warn_data()
+    name = f"{user.name}#{user.discriminator}"
+
+    if str(user.id) in users:
+        return False
+    else:
+
+        users[str(user.id)] = {}
+        users[str(user.id)]["user_name"] = name
+        users[str(user.id)]["1er Warn"] = "Aucune"
+        users[str(user.id)]["w-Jour1"] = 0
+        users[str(user.id)]["w-Mois1"] = 0
+        users[str(user.id)]["w-Annee1"] = 0
+        users[str(user.id)]["w-Heure1"] = 0
+        users[str(user.id)]["w-Minute1"] = 0
+        users[str(user.id)]["2eme Warn"] = "Aucune"
+        users[str(user.id)]["w-Jour2"] = 0
+        users[str(user.id)]["w-Mois2"] = 0
+        users[str(user.id)]["w-Annee2"] = 0
+        users[str(user.id)]["w-Heure2"] = 0
+        users[str(user.id)]["w-Minute2"] = 0
+
+    with open("/home/mmi21b12/DISCORD/VOLTAGE/warns.json", "w") as f:
+        json.dump(users, f, indent=2)
+    return True
+
+
 class Warn(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -16,8 +52,8 @@ class Warn(commands.Cog):
 
         log_channel = self.bot.get_channel(853703546028818443)
 
-        await self.first_warn(user, ctx.guild.id)
-        users = await self.get_warn_data()
+        await first_warn(user)
+        users = await get_warn_data()
         date = datetime.datetime.now()
 
         em = discord.Embed(description=f"**{user}** a été warn! \n \n **Raison:** {reason}", color=0xFF6C00)
@@ -51,7 +87,7 @@ class Warn(commands.Cog):
             print(f"Il y a une erreur!")
 
         with open("/home/mmi21b12/DISCORD/VOLTAGE/warns.json", "w") as f:
-            users = json.dump(users, f, indent=2)
+            json.dump(users, f, indent=2)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -62,40 +98,6 @@ class Warn(commands.Cog):
 
         with open("warns.json", "w") as f:
             json.dump(users, f, indent=2)
-
-    async def first_warn(self, user, guild):
-
-        users = await self.get_warn_data()
-        name = f"{user.name}#{user.discriminator}"
-
-        if str(user.id) in users:
-            return False
-        else:
-
-            users[str(user.id)] = {}
-            users[str(user.id)]["user_name"] = name
-            users[str(user.id)]["1er Warn"] = "Aucune"
-            users[str(user.id)]["w-Jour1"] = 0
-            users[str(user.id)]["w-Mois1"] = 0
-            users[str(user.id)]["w-Annee1"] = 0
-            users[str(user.id)]["w-Heure1"] = 0
-            users[str(user.id)]["w-Minute1"] = 0
-            users[str(user.id)]["2eme Warn"] = "Aucune"
-            users[str(user.id)]["w-Jour2"] = 0
-            users[str(user.id)]["w-Mois2"] = 0
-            users[str(user.id)]["w-Annee2"] = 0
-            users[str(user.id)]["w-Heure2"] = 0
-            users[str(user.id)]["w-Minute2"] = 0
-
-        with open("/home/mmi21b12/DISCORD/VOLTAGE/warns.json", "w") as f:
-            users = json.dump(users, f, indent=2)
-        return True
-
-    async def get_warn_data(self):
-        with open("/home/mmi21b12/DISCORD/VOLTAGE/warns.json", "r") as f:
-            users = json.load(f)
-
-        return users
 
 
 def setup(bot):
