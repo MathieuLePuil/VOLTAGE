@@ -91,12 +91,12 @@ class Warn(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        with open("warns.json", "r") as f:
+        with open("/home/mmi21b12/DISCORD/VOLTAGE/warns.json", "r") as f:
             users = json.load(f)
 
         users[str(guild.id)] = {}
 
-        with open("warns.json", "w") as f:
+        with open("/home/mmi21b12/DISCORD/VOLTAGE/warns.json", "w") as f:
             json.dump(users, f, indent=2)
 
 
