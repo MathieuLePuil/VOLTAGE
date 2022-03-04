@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+bans.json
+kicks.json
+mutes.json
+prefixes.json
+prisons.json
+warns.json
