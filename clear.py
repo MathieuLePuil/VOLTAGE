@@ -9,7 +9,7 @@ class Clear(commands.Cog):
     @cog_ext.cog_slash(name="clear", description="Supprime un certain nombre de message.")
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx, number: int):
-        await ctx.channel.purge(limit=number + 1, check=lambda msg: not msg.pinned)
+        await ctx.channel.purge(limit=number, check=lambda msg: not msg.pinned)
         if number != 1:
             await ctx.send(f"<a:scarycheck:835499517977690122>  **`{number}` messages ont été supprimés.**",
                            delete_after=5)
