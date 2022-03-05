@@ -1,11 +1,12 @@
 from discord.ext import commands
+from discord_slash import cog_ext
 
 
 class Clear(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @cog_ext.cog_slash(name="clear", description="Supprime un certain nombre de message.")
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx, number: int):
         await ctx.channel.purge(limit=number + 1, check=lambda msg: not msg.pinned)
