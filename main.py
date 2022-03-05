@@ -13,7 +13,7 @@ intents.reactions = True
 # py desktop\Bots_Discord\Voltage\main.py
 
 
-async def get_prefix(message):
+async def get_prefix(bot, message):
     with open("/home/mmi21b12/DISCORD/VOLTAGE/prefixes.json", "r") as f:
         prefixes = json.load(f)
 

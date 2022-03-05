@@ -45,6 +45,8 @@ class Prefix(commands.Cog):
         except:
             pass
 
+        await bot.process_command(msg)
+
 
 def setup(bot):
     bot.add_cog(Prefix(bot))
